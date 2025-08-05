@@ -9,6 +9,7 @@ import Cancel from "./assets/cancel.svg?react";
 import SearchAction from "./assets/searchLong.svg?react";
 import Plus from "./assets/plus.svg?react";
 import ToggleSideBarOpen from "./assets/toggleSideBarClose.svg?react";
+import DropdownArrow from "./assets/dropdownArrow.svg?react";
 
 /*
  STATE
@@ -19,8 +20,8 @@ selected thread: store with other threads?
 sidebar visible done this
  */
 
-function SideBar() {
-    const [sideBarOpen, setSideBarOpen] = useState(true);
+function SideBar({ isSideBarOpen, toggleSideBar }) {
+    // const [sideBarOpen, setSideBarOpen] = useState(true);
     //temp
     const chats = [
         {
@@ -41,25 +42,29 @@ function SideBar() {
         plan: "Free",
     };
 
-    return sideBarOpen ? (
-        <div
-            className={`w-1/5 h-full bg-[#363030] px-5 duration-500 ease-in-out`}
-        >
-            <SideBarHeader open={sideBarOpen} onSideBarOpen={setSideBarOpen} />
-            <button className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#905E9B] focus:outline-[0.4px] focus:outline-white">
-                New Chat
-            </button>
-            <button className="inline-flex font-poppins font-medium w-full mt-10 justify-between py-2 px-5 hover:bg-[#5F5050] rounded-[4px]">
-                Search Chats
-                <span>
-                    <Search />
-                </span>
-            </button>
-            <ChatsArea chats={chats} />
-            <UserProfileCard user={user} />
-        </div>
-    ) : (
-        <QuickActions onToggleSideBar={setSideBarOpen} />
+    return (
+        <>
+            <div
+                className={`w-1/5 fixed h-full bg-[#363030] px-5 transform transition-transform duration-300 ease-in-out z-50 ${isSideBarOpen ? "translate-x-0" : "-translate-x-full"}`}
+            >
+                <SideBarHeader
+                    open={isSideBarOpen}
+                    onSideBarOpen={toggleSideBar}
+                />
+                <button className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#905E9B] focus:outline-[0.4px] focus:outline-[#A4A0A0]">
+                    New Chat
+                </button>
+                <button className="inline-flex font-poppins font-medium w-full mt-10 justify-between py-2 px-5 hover:bg-[#5F5050] rounded-[4px]">
+                    Search Chats
+                    <span>
+                        <Search />
+                    </span>
+                </button>
+                <ChatsArea chats={chats} />
+                <UserProfileCard user={user} />
+            </div>
+            {!isSideBarOpen && <QuickActions onToggleSideBar={toggleSideBar} />}
+        </>
     );
 }
 
@@ -96,11 +101,11 @@ function SideBarHeader({ open, onSideBarOpen }) {
     }
 
     return (
-        <nav className="flex flex-row justify-between content-center mt-12">
+        <nav className="flex flex-row items-center justify-between content-center mt-12">
             <span onClick={handleToogleSideBar}>
                 <ToggleSideBarButton width={26} height={26} />
             </span>
-            <span className="inline-flex space-x-2">
+            <span className="inline-flex items-center space-x-2">
                 <span className="font-poor-story text-[29px] font-light">
                     Chai
                 </span>
@@ -220,22 +225,61 @@ function ChatsArea({ chats }) {
     );
 }
 
-function ModelCard({ model }) {
+function SelectModelDropdown({ models }) {
+    const [selectedModel, setSelectedModel] = useState(models[0]);
+    const [isOpen, setDropdownOpen] = useState(false);
+
+    function handleToggleDropdown(e) {
+        e.preventDefault();
+        setDropdownOpen(!isOpen);
+    }
+
+    const modelOptions = models.map((model) => {
+        return (
+            <li key={model.id}>
+                <ModelCard
+                    name={model.name}
+                    desc={model.description}
+                    logo={model.logosrc}
+                    isSelected={selectedModel.id === model.id}
+                    onSelect={setSelectedModel}
+                />
+            </li>
+        );
+    });
+    return (
+        <div>
+            <button
+                className="flex items-center justify-center p-2 w-[200px] h-[33px] rounded-[7px] bg-[#5F5050] border border-[#FBF5F5]"
+                onClick={(e) => handleToggleDropdown(e)}
+            >
+                <span className="w-full font-poppins font-normal text-[15px]">
+                    {selectedModel.name}{" "}
+                </span>
+                <span className="mx-4">
+                    <DropdownArrow />
+                </span>
+            </button>
+            {isOpen && (
+                <div className="absolute z-10 mt-1">
+                    {" "}
+                    <ul>{modelOptions}</ul>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function ModelCard({ name, desc, logo, isSelected, onSelect }) {
     return (
         <>
-            <button>{model.name}</button>
-            <img src={model.logosrc} alt="logo" />
+            <button>{name}</button>
+            <img src={logo} alt="logo" />
         </>
     );
 }
 
 function PromptTextBox({ prompt, models }) {
-    const modelOptions = models.map((model) => (
-        <div value={model.id} key={model.id}>
-            <ModelCard model={model} />{" "}
-        </div>
-    ));
-
     return (
         <div className="w-[671px] h-[140px] bg-[#7A6464] rounded-xl border border-white">
             <form className="flex flex-col w-full h-full" action="">
@@ -251,15 +295,12 @@ function PromptTextBox({ prompt, models }) {
                         className="h-[33px]"
                         style={{ display: "none" }}
                     />
-                    <button className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]">
-                        <Link />
-                    </button>
-                    {/* <div */}
-                    {/*     value={models[0].id} */}
-                    {/*     onSelectModel={(e) => setSelectedModel(e.target.value)} */}
-                    {/* > */}
-                    {/*     {modelOptions} */}
-                    {/* </div> */}
+                    <div className="flex gap-2">
+                        <SelectModelDropdown models={models} />
+                        <button className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]">
+                            <Link />
+                        </button>
+                    </div>
                     <button
                         className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]"
                         type="submit"
@@ -299,9 +340,11 @@ function PromptArea() {
     );
 }
 
-function InteractiveChatWindow() {
+function InteractiveChatWindow({ sideBarOpen }) {
     return (
-        <div className="flex flex-col bg-[#3D3636] h-full w-full">
+        <div
+            className={`flex flex-col bg-[#3D3636] h-full w-full ${sideBarOpen ? "ml-[279px]" : ""} duration-500 ease-in-out`}
+        >
             <span className="m-5 flex flex-row-reverse">
                 <Cog />
             </span>
@@ -311,10 +354,14 @@ function InteractiveChatWindow() {
 }
 
 function App() {
+    const [sideBarOpen, setSideBarOpen] = useState(true);
     return (
-        <div className="w-screen h-screen flex m-0">
-            <SideBar />
-            <InteractiveChatWindow />
+        <div className="w-screen h-screen flex m-0 bg-[#3D3636]">
+            <SideBar
+                isSideBarOpen={sideBarOpen}
+                toggleSideBar={setSideBarOpen}
+            />
+            <InteractiveChatWindow sideBarOpen={sideBarOpen} />
         </div>
     );
 }
