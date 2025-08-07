@@ -10,6 +10,9 @@ import SearchAction from "./assets/searchLong.svg?react";
 import Plus from "./assets/plus.svg?react";
 import ToggleSideBarOpen from "./assets/toggleSideBarClose.svg?react";
 import DropdownArrow from "./assets/dropdownArrow.svg?react";
+import Claude from "./assets/models/claude.svg?react";
+import OpenAI from "./assets/models/openai.svg?react";
+import Gemini from "./assets/models/gemini.svg?react";
 
 /*
  STATE
@@ -51,7 +54,7 @@ function SideBar({ isSideBarOpen, toggleSideBar }) {
                     open={isSideBarOpen}
                     onSideBarOpen={toggleSideBar}
                 />
-                <button className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#905E9B] focus:outline-[0.4px] focus:outline-[#A4A0A0]">
+                <button className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#917A96] focus:outline-[0.4px] focus:outline-[#A4A0A0]">
                     New Chat
                 </button>
                 <button className="inline-flex font-poppins font-medium w-full mt-10 justify-between py-2 px-5 hover:bg-[#5F5050] rounded-[4px]">
@@ -126,7 +129,7 @@ function UserProfileCard({ user }) {
         <div>{user.fullName[0]}</div>
     );
     return (
-        <div className="flex items-center gap-6 pl-1.5  w-full h-22 hover:bg-[#2B2B29] rounded-[12px] ">
+        <div className="flex items-center gap-6 pl-1.5 w-full h-22 hover:bg-[#2B2B29] rounded-[12px] ">
             {avatar}
             <div className="font-poppins">
                 <div>{user.fullName}</div>
@@ -226,8 +229,9 @@ function ChatsArea({ chats }) {
 }
 
 function SelectModelDropdown({ models }) {
-    const [selectedModel, setSelectedModel] = useState(models[0]);
+    const [selectedModel, setSelectedModel] = useState(models[0].id);
     const [isOpen, setDropdownOpen] = useState(false);
+    const name = models.find((model) => model.id === selectedModel).name;
 
     function handleToggleDropdown(e) {
         e.preventDefault();
@@ -238,10 +242,11 @@ function SelectModelDropdown({ models }) {
         return (
             <li key={model.id}>
                 <ModelCard
+                    id={model.id}
                     name={model.name}
                     desc={model.description}
-                    logo={model.logosrc}
-                    isSelected={selectedModel.id === model.id}
+                    logo={model.logo}
+                    isSelected={selectedModel === model.id}
                     onSelect={setSelectedModel}
                 />
             </li>
@@ -253,15 +258,15 @@ function SelectModelDropdown({ models }) {
                 className="flex items-center justify-center p-2 w-[200px] h-[33px] rounded-[7px] bg-[#5F5050] border border-[#FBF5F5]"
                 onClick={(e) => handleToggleDropdown(e)}
             >
-                <span className="w-full font-poppins font-normal text-[15px]">
-                    {selectedModel.name}{" "}
+                <span className="w-full font-poppins font-medium text-[15px]">
+                    {name}{" "}
                 </span>
                 <span className="mx-4">
                     <DropdownArrow />
                 </span>
             </button>
             {isOpen && (
-                <div className="absolute z-10 mt-1">
+                <div className="absolute z-10 mt-1 bg-[#30302E] rounded-[7px] max-h-60 overflow-y-auto">
                     {" "}
                     <ul>{modelOptions}</ul>
                 </div>
@@ -270,12 +275,20 @@ function SelectModelDropdown({ models }) {
     );
 }
 
-function ModelCard({ name, desc, logo, isSelected, onSelect }) {
+function ModelCard({ id, name, desc, logo, isSelected, onSelect }) {
     return (
-        <>
-            <button>{name}</button>
-            <img src={logo} alt="logo" />
-        </>
+        <div
+            className={`flex items-center w-[300px] h-15 mx-3 my-2.5 ${isSelected ? "bg-[#1E1D1C]" : ""} ${isSelected ? "hover:bg-[#1E1D1C]" : "hover:bg-[#484349]"} rounded-sm`}
+            onClick={() => onSelect(id)}
+        >
+            <div className="flex flex-col w-4/5 m-5 font-normal font-poppins">
+                <p className="text-sm">{name}</p>
+                <p className="text-[9px]">{desc}</p>
+            </div>
+            <span className="flex items-center justify-center w-12 h-12">
+                {logo}
+            </span>
+        </div>
     );
 }
 
@@ -328,8 +341,21 @@ function PromptArea() {
     const models = [
         {
             id: "9933ccd7-82c6-4e63-b0f4-6b7cc2dddc32",
-            name: "Claude 4 Sonnet",
-            logosrc: "http://image.com",
+            name: "Claude Sonnet 4",
+            description: "Powerful large model for challenging tasks",
+            logo: <Claude height={18} width={18} />,
+        },
+        {
+            id: "e047c365-1028-4303-8ea8-08863da3c30e",
+            name: "ChatGPT-4o",
+            description: "Powerful large model for challenging tasks",
+            logo: <OpenAI height={18} width={18} />,
+        },
+        {
+            id: "868566da-9157-4d8a-88a9-a73af2b4693c",
+            name: "Gemini-2.5 Flash",
+            description: "Powerful large model for challenging tasks",
+            logo: <Gemini height={18} width={18} />,
         },
     ];
     return (
