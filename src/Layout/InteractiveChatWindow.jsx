@@ -6,6 +6,7 @@ import Claude from "../assets/models/claude.svg?react";
 import OpenAI from "../assets/models/openai.svg?react";
 import Gemini from "../assets/models/gemini.svg?react";
 import DropdownArrow from "../assets/dropdownArrow.svg?react";
+import SearchWindow from "./SearchWindow";
 
 function GreetingText({ greeting }) {
     return (
@@ -84,37 +85,43 @@ function PromptTextBox({ prompt, onChangePrompt, models }) {
         onChangePrompt(e.target.value);
     }
     return (
-        <div className="w-[671px] h-[140px] bg-[#7A6464] rounded-xl border border-white">
-            <form className="flex flex-col w-full h-full" action="">
-                <textarea
-                    rows="4"
-                    cols="50"
-                    placeholder="How can I help you today..."
-                    value={prompt}
-                    onChange={(e) => handleChangePrompt(e)}
-                    className={`h-[80%] pl-4 pt-5 font-medium ${prompt ? "text-white" : "text-[#A4A0A0]"} text-xl font-poppins outline-none`}
-                ></textarea>
-                <div className="flex m-2 justify-between">
-                    <input
-                        type="file"
-                        className="h-[33px]"
-                        style={{ display: "none" }}
-                    />
-                    <div className="flex gap-2">
-                        <SelectModelDropdown models={models} />
-                        <button className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]">
-                            <Link />
+        <>
+            <div className="w-[671px] h-[140px] bg-[#7A6464] rounded-xl border border-white">
+                <form className="flex flex-col w-full h-full" action="">
+                    <textarea
+                        rows="4"
+                        cols="50"
+                        placeholder="How can I help you today..."
+                        value={prompt}
+                        onChange={(e) => handleChangePrompt(e)}
+                        className={`h-[80%] pl-4 pt-5 font-medium ${prompt ? "text-white" : "text-[#A4A0A0]"} text-xl font-poppins outline-none`}
+                    ></textarea>
+                    <div className="flex m-2 justify-between">
+                        <input
+                            type="file"
+                            className="h-[33px]"
+                            style={{ display: "none" }}
+                        />
+                        <div className="flex gap-2">
+                            <SelectModelDropdown models={models} />
+                            <button className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]">
+                                <Link />
+                            </button>
+                        </div>
+                        <button
+                            className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]"
+                            type="submit"
+                        >
+                            <ArrowUp />
                         </button>
                     </div>
-                    <button
-                        className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]"
-                        type="submit"
-                    >
-                        <ArrowUp />
-                    </button>
-                </div>
-            </form>
-        </div>
+                </form>
+            </div>
+            <div
+                style={{ display: "none" }}
+                className="mt-0 rounded-b-xl h-[140px] w-[671px] border border-white bg-[#484349]"
+            ></div>
+        </>
     );
 }
 
@@ -154,7 +161,10 @@ function PromptArea() {
     );
 }
 
-export default function InteractiveChatWindow({ sideBarOpen }) {
+export default function InteractiveChatWindow({
+    searchWindowOpen,
+    sideBarOpen,
+}) {
     return (
         <div
             className={`flex flex-col bg-[#3D3636] h-full w-full ${sideBarOpen ? "ml-[279px]" : ""} duration-500 ease-in-out`}
@@ -162,7 +172,7 @@ export default function InteractiveChatWindow({ sideBarOpen }) {
             <span className="m-5 flex flex-row-reverse">
                 <Cog />
             </span>
-            <PromptArea />
+            {searchWindowOpen ? <SearchWindow /> : <PromptArea />}
         </div>
     );
 }

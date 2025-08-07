@@ -157,7 +157,12 @@ function ChatsArea({ chats }) {
     );
 }
 
-export default function SideBar({ isSideBarOpen, toggleSideBar }) {
+export default function SideBar({
+    isSideBarOpen,
+    toggleSideBar,
+    isSearchOpen,
+    toggleSearch,
+}) {
     // const [sideBarOpen, setSideBarOpen] = useState(true);
     //temp
     const chats = [
@@ -188,10 +193,16 @@ export default function SideBar({ isSideBarOpen, toggleSideBar }) {
                     open={isSideBarOpen}
                     onSideBarOpen={toggleSideBar}
                 />
-                <button className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#917A96] focus:outline-[0.4px] focus:outline-[#A4A0A0]">
+                <button
+                    onClick={() => toggleSearch(false)}
+                    className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#917A96] focus:outline-[0.4px] focus:outline-[#A4A0A0]"
+                >
                     New Chat
                 </button>
-                <button className="inline-flex font-poppins font-medium w-full mt-10 justify-between py-2 px-5 hover:bg-[#5F5050] rounded-[4px]">
+                <button
+                    onClick={() => toggleSearch(true)}
+                    className={`inline-flex font-poppins font-medium w-full mt-10 justify-between py-2 px-5 ${isSearchOpen ? "bg-[#484349]" : ""} hover:bg-[#5F5050] rounded-[4px]`}
+                >
                     Search Chats
                     <span>
                         <Search />
