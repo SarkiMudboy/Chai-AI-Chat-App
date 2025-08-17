@@ -8,6 +8,36 @@ import Gemini from "../assets/models/gemini.svg?react";
 import DropdownArrow from "../assets/dropdownArrow.svg?react";
 import SearchWindow from "./SearchWindow";
 
+/*
+ state = 'loading'
+ model picker is disabled
+ file picker is disabled
+ prompt text area is disabled
+ if its a new chat, the chat area will have those tree circle animation (depicting loading state)
+ if new chat, skeleton showing a new chat is eminent in the sidebar 
+*/
+
+const models = [
+    {
+        id: "9933ccd7-82c6-4e63-b0f4-6b7cc2dddc32",
+        name: "Claude Sonnet 4",
+        description: "Powerful large model for challenging tasks",
+        logo: <Claude height={18} width={18} />,
+    },
+    {
+        id: "e047c365-1028-4303-8ea8-08863da3c30e",
+        name: "ChatGPT-4o",
+        description: "Powerful large model for challenging tasks",
+        logo: <OpenAI height={18} width={18} />,
+    },
+    {
+        id: "868566da-9157-4d8a-88a9-a73af2b4693c",
+        name: "Gemini-2.5 Flash",
+        description: "Powerful large model for challenging tasks",
+        logo: <Gemini height={18} width={18} />,
+    },
+];
+
 function GreetingText({ greeting }) {
     return (
         <p className="font-poppins font-semibold text-3xl -mt-[120px] mb-20">
@@ -33,17 +63,21 @@ function ModelCard({ id, name, desc, logo, isSelected, onSelect }) {
     );
 }
 
-function SelectModelDropdown({ models }) {
-    const [selectedModel, setSelectedModel] = useState(models[0].id);
+function SelectModelDropdown({ models, options, onChangeModel }) {
+    // const [selectedModel, setSelectedModel] = useState(models[0].id);
     const [isOpen, setDropdownOpen] = useState(false);
-    const name = models.find((model) => model.id === selectedModel).name;
+    const selectedModel = models.find((model) => model.id === options.model);
 
     function handleToggleDropdown(e) {
         e.preventDefault();
         setDropdownOpen(!isOpen);
     }
 
-    const modelOptions = models.map((model) => {
+    function handleSelectModel(id) {
+        onChangeModel({ ...options, model: id });
+    }
+
+    const modelList = models.map((model) => {
         return (
             <li key={model.id}>
                 <ModelCard
@@ -51,8 +85,8 @@ function SelectModelDropdown({ models }) {
                     name={model.name}
                     desc={model.description}
                     logo={model.logo}
-                    isSelected={selectedModel === model.id}
-                    onSelect={setSelectedModel}
+                    isSelected={selectedModel.id === model.id}
+                    onSelect={handleSelectModel}
                 />
             </li>
         );
@@ -60,11 +94,11 @@ function SelectModelDropdown({ models }) {
     return (
         <div>
             <button
-                className="flex items-center justify-center p-2 w-[200px] h-[33px] rounded-[7px] bg-[#5F5050] border border-[#FBF5F5]"
+                className="flex items-center justify-center p-2 w-[200px] h-[33px] rounded-[7px] bg-[#5F5050] border border-[#FBF5F5] hover:bg-[#744949] disabled:bg-[#3D3636]"
                 onClick={(e) => handleToggleDropdown(e)}
             >
                 <span className="w-full font-poppins font-medium text-[15px]">
-                    {name}{" "}
+                    {selectedModel.name}{" "}
                 </span>
                 <span className="mx-4">
                     <DropdownArrow />
@@ -73,16 +107,16 @@ function SelectModelDropdown({ models }) {
             {isOpen && (
                 <div className="absolute z-10 mt-1 bg-[#30302E] rounded-[7px] max-h-60 overflow-y-auto">
                     {" "}
-                    <ul>{modelOptions}</ul>
+                    <ul>{modelList}</ul>
                 </div>
             )}
         </div>
     );
 }
 
-function PromptTextBox({ prompt, onChangePrompt, models }) {
+function PromptTextBox({ promptOption, onChangePromptOption, models }) {
     function handleChangePrompt(e) {
-        onChangePrompt(e.target.value);
+        onChangePromptOption({ ...promptOption, prompt: e.target.value });
     }
     return (
         <>
@@ -92,9 +126,9 @@ function PromptTextBox({ prompt, onChangePrompt, models }) {
                         rows="4"
                         cols="50"
                         placeholder="How can I help you today..."
-                        value={prompt}
+                        value={promptOption.prompt}
                         onChange={(e) => handleChangePrompt(e)}
-                        className={`h-[80%] pl-4 pt-5 font-medium ${prompt ? "text-white" : "text-[#A4A0A0]"} text-xl font-poppins outline-none`}
+                        className={`h-[80%] pl-4 pt-5 font-medium ${prompt ? "text-white" : "text-[#A4A0A0]"} text-xl font-poppins outline-none disabled:bg-[#484349]`}
                     ></textarea>
                     <div className="flex m-2 justify-between">
                         <input
@@ -103,13 +137,18 @@ function PromptTextBox({ prompt, onChangePrompt, models }) {
                             style={{ display: "none" }}
                         />
                         <div className="flex gap-2">
-                            <SelectModelDropdown models={models} />
-                            <button className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]">
+                            <SelectModelDropdown
+                                models={models}
+                                options={promptOption}
+                                onChangeModel={onChangePromptOption}
+                            />
+                            <button className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#744949] disabled:bg-[#3D3636]">
                                 <Link />
                             </button>
                         </div>
                         <button
-                            className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#7A6464]"
+                            disabled={!promptOption.prompt}
+                            className="flex justify-center items-center mr-1 w-[32px] h-[33px] bg-[#5F5050] rounded-[6px] border border-[#FBF5F5] hover:bg-[#744949] disabled:bg-[#3D3636]"
                             type="submit"
                         >
                             <ArrowUp />
@@ -126,36 +165,19 @@ function PromptTextBox({ prompt, onChangePrompt, models }) {
 }
 
 function PromptArea() {
-    const [prompt, setPrompt] = useState(null); // might move to context
+    const [promptOption, setPromptOption] = useState({
+        prompt: "",
+        model: models[0].id,
+    }); // might move to context
     // this should be a type containing {prompt: string, file: File | null, selectedModel: Model}
 
-    const models = [
-        {
-            id: "9933ccd7-82c6-4e63-b0f4-6b7cc2dddc32",
-            name: "Claude Sonnet 4",
-            description: "Powerful large model for challenging tasks",
-            logo: <Claude height={18} width={18} />,
-        },
-        {
-            id: "e047c365-1028-4303-8ea8-08863da3c30e",
-            name: "ChatGPT-4o",
-            description: "Powerful large model for challenging tasks",
-            logo: <OpenAI height={18} width={18} />,
-        },
-        {
-            id: "868566da-9157-4d8a-88a9-a73af2b4693c",
-            name: "Gemini-2.5 Flash",
-            description: "Powerful large model for challenging tasks",
-            logo: <Gemini height={18} width={18} />,
-        },
-    ];
     return (
         <div className="flex flex-col flex-1 justify-center items-center relative">
             <GreetingText greeting="What's up Sarki" />
             <PromptTextBox
                 models={models}
-                prompt={prompt}
-                onChangePrompt={setPrompt}
+                promptOption={promptOption}
+                onChangePromptOption={setPromptOption}
             />
         </div>
     );
