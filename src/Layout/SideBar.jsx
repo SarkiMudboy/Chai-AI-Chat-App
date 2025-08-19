@@ -89,35 +89,45 @@ function TimeContextLabel({ timeContext /* This will be the type above */ }) {
     );
 }
 
-function SelectChatButton({ id, title, selected, onSelectChat }) {
+function SelectChatButton({ id, title, selected, onSelectChat, loading }) {
     // we check if the chat is selected then we highlight the button
     return (
         <>
-            <button
-                className="flex items-center py-2.5 px-5 w-full hover:bg-[#5F5050] rounded-lg"
-                onClick={() => onSelectChat(id)}
-            >
-                <span className="flex-1 font-poppins text-sm font-medium overflow-hidden text-ellipsis truncate">
-                    {title}
-                </span>
-                <span className="opacity-0 hover:opacity-100 hover:pl-2.5">
-                    <Cancel />
-                </span>
-            </button>
+            {loading ? (
+                <button className="flex items-center py-2.5 px-5 w-full">
+                    <div class="flex-1 w-[200px] h-5 bg-[#484349]"></div>
+                </button>
+            ) : (
+                <button
+                    className="flex items-center py-2.5 px-5 w-full hover:bg-[#5F5050] rounded-lg"
+                    onClick={() => onSelectChat(id)}
+                >
+                    <span className="flex-1 font-poppins text-sm font-medium overflow-hidden text-ellipsis truncate">
+                        {title}
+                    </span>
+                    <span className="opacity-0 hover:opacity-100 hover:pl-2.5">
+                        <Cancel />
+                    </span>
+                </button>
+            )}
         </>
     );
 }
 
 function TimeContextGroup({ contextLabel, chats, selectedChat, onSelectChat }) {
-    const chatsButtons = chats.map((chat) => (
-        <SelectChatButton
-            key={chat.id}
-            id={chat.id}
-            title={chat.title}
-            selected={selectedChat}
-            onSelectChat={onSelectChat}
-        />
-    ));
+    const chatsButtons = chats.map((chat) =>
+        chat === "pendingChat" ? (
+            <SelectChatButton loading={true} />
+        ) : (
+            <SelectChatButton
+                key={chat.id}
+                id={chat.id}
+                title={chat.title}
+                selected={selectedChat}
+                onSelectChat={onSelectChat}
+            />
+        ),
+    );
     return (
         <div>
             <TimeContextLabel timeContext={contextLabel} />
@@ -126,7 +136,7 @@ function TimeContextGroup({ contextLabel, chats, selectedChat, onSelectChat }) {
     );
 }
 
-function ChatsArea({ chats }) {
+function ChatsArea({ chats, pendingChat }) {
     let group = {};
     let contextGroup = [];
     const [selectedChat, setSelectedChat] = useState(chats[0].id); // we are making the assumption that this component owns this state
@@ -136,6 +146,11 @@ function ChatsArea({ chats }) {
         group[timeContext] = group[timeContext] || [];
         group[timeContext].push(chat);
     });
+
+    if (pendingChat) {
+        group["Today"].unshift("pendingChat");
+    }
+
     console.log(group);
     Object.entries(group).forEach(([context, threads]) => {
         contextGroup.push(
@@ -160,11 +175,13 @@ function ChatsArea({ chats }) {
 export default function SideBar({
     isSideBarOpen,
     toggleSideBar,
-    isSearchOpen,
-    toggleSearch,
+    currentWindow,
+    toggleCurrentWindow,
+    pendingChat,
 }) {
     // const [sideBarOpen, setSideBarOpen] = useState(true);
     //temp
+    const isSearchOpen = currentWindow == "search";
     const chats = [
         {
             id: "8dfe2fa5-e146-4fdb-95b1-db96e3f4a46ei",
@@ -194,13 +211,13 @@ export default function SideBar({
                     onSideBarOpen={toggleSideBar}
                 />
                 <button
-                    onClick={() => toggleSearch(false)}
+                    onClick={() => toggleCurrentWindow("newChat")}
                     className="mt-12 w-full h-[32] p-2 font-poppins font-[400] text-base rounded-lg bg-[#7F518A] hover:bg-[#917A96] focus:outline-[0.4px] focus:outline-[#A4A0A0]"
                 >
                     New Chat
                 </button>
                 <button
-                    onClick={() => toggleSearch(true)}
+                    onClick={() => toggleCurrentWindow("search")}
                     className={`inline-flex font-poppins font-medium w-full mt-10 justify-between py-2 px-5 ${isSearchOpen ? "bg-[#484349]" : ""} hover:bg-[#5F5050] rounded-[4px]`}
                 >
                     Search Chats
@@ -208,7 +225,7 @@ export default function SideBar({
                         <Search />
                     </span>
                 </button>
-                <ChatsArea chats={chats} />
+                <ChatsArea chats={chats} pendingChat={pendingChat} />
                 <UserProfileCard user={user} />
             </div>
             {!isSideBarOpen && <QuickActions onToggleSideBar={toggleSideBar} />}

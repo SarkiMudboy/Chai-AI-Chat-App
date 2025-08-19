@@ -10,10 +10,12 @@ import SearchWindow from "./SearchWindow";
 
 /*
  state = 'loading'
- model picker is disabled
+ --- This happens regardless 
+ model picker is disabled 
  file picker is disabled
  prompt text area is disabled
- if its a new chat, the chat area will have those tree circle animation (depicting loading state)
+--- loading and
+if its a new chat, the chat area will have those tree circle animation (depicting loading state)
  if new chat, skeleton showing a new chat is eminent in the sidebar 
 */
 
@@ -164,7 +166,8 @@ function PromptTextBox({ promptOption, onChangePromptOption, models }) {
     );
 }
 
-function PromptArea() {
+function PromptArea({ genreratingResponse, toggleGenerating, isNewChat }) {
+    // we've drilled enuff abeg lets see how to improve this...
     const [promptOption, setPromptOption] = useState({
         prompt: "",
         model: models[0].id,
@@ -184,9 +187,12 @@ function PromptArea() {
 }
 
 export default function InteractiveChatWindow({
-    searchWindowOpen,
+    currentWindow,
     sideBarOpen,
+    generating,
+    toggleGenerating,
 }) {
+    const searchWindowOpen = currentWindow == "search";
     return (
         <div
             className={`flex flex-col bg-[#3D3636] h-full w-full ${sideBarOpen ? "ml-[279px]" : ""} duration-500 ease-in-out`}
@@ -194,7 +200,14 @@ export default function InteractiveChatWindow({
             <span className="m-5 flex flex-row-reverse">
                 <Cog />
             </span>
-            {searchWindowOpen ? <SearchWindow /> : <PromptArea />}
+            {searchWindowOpen ? (
+                <SearchWindow />
+            ) : (
+                <PromptArea
+                    genreratingResponse={generating}
+                    toggleGenerating={toggleGenerating}
+                />
+            )}
         </div>
     );
 }
