@@ -2,6 +2,17 @@ import { useState } from "react";
 import InteractiveChatWindow from "./Layout/InteractiveChatWindow";
 import SideBar from "./Layout/SideBar";
 
+/*
+const [item, setItem] = useState(null)
+export const updateItem = item.reduce((id) => {})
+export const deleteItem= item.reduce((id) => {})
+
+import { updateItem, deleteItem } from items.js
+
+updateItem(id)
+
+ */
+
 function App() {
     const [sideBarOpen, setSideBarOpen] = useState(true);
     const [currentWindow, setCurrentWindow] = useState("newChat"); // options: "newChat", "search", "threadId" : uuid type
